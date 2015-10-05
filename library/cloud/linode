@@ -334,22 +334,22 @@ def linodeServers(module, api, state, name, plan, distribution, datacenter, lino
                 
                 # at least 750MB for main partition
                 if size < 750:
-                    raise Exception("Not enough space left for main partition")
+                    raise Exception("Not enough space left for main partition %s" % (size,))
                 
                 # Create data disk
                 if ssh_pub_key:
                     res = api.linode_disk_createfromdistribution(
                               LinodeId=linode_id, DistributionID=distribution, 
                               rootPass=password, rootSSHKey=ssh_pub_key,
-                              Label='%s data disk (lid: %s)' % (name, linode_id), Size=size)
+                              Label=('%s data (lid: %s)' % (name, linode_id))[0:49], Size=size)
                 else:
                     res = api.linode_disk_createfromdistribution(
                               LinodeId=linode_id, DistributionID=distribution, rootPass=password, 
-                              Label='%s data disk (lid: %s)' % (name, linode_id), Size=size)
+                              Label=('%s data (lid: %s)' % (name, linode_id))[0:49], Size=size)
                 jobs.append(res['JobID'])
                 # Create SWAP disk
                 res = api.linode_disk_create(LinodeId=linode_id, Type='swap', 
-                                             Label='%s swap disk (lid: %s)' % (name, linode_id), 
+                                             Label=('%s swap (lid: %s)' % (name, linode_id))[0:49], 
                                              Size=swap)
                 jobs.append(res['JobID'])
                 
@@ -360,7 +360,7 @@ def linodeServers(module, api, state, name, plan, distribution, datacenter, lino
                         if p['type'] not in ['ext3', 'ext4', 'raw']:
                             raise Exception("Invalid partition type")
                         res = api.linode_disk_create(LinodeId=linode_id, Type=p['type'], 
-                                        Label='%s partition %s %s' % (name[:25], partitionid, linode_id), 
+                                        Label=('%s partition %s %s' % (name[:25], partitionid, linode_id))[:49], 
                                         Size=p['size'])
                         jobs.append(res['JobID'])
                         partitionid += 1
